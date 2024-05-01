@@ -2,25 +2,45 @@ package mines
 
 import "testing"
 
-func TestNewMineBoard(t *testing.T) {
-  board := NewMineBoard(10, 5, 5)
+func TestCreateEmptyBoard(t *testing.T) {
+  var rows = 10
+  var cols = 5
+  var totalBombs = 5
+  board := MineBoard{Rows: rows, Cols: cols, Bombs: totalBombs}
+  board.CreateEmptyBoard()
+
   var cells = board.Cells
 
-  if len(cells) != 50 {
-    t.Errorf("cells should have length 50, but got %d", len(cells))
+  if len(cells) != rows || len(cells[0]) != cols {
+    t.Errorf("rows should have length %d, but got %d", rows, len(cells))
   }
 
-  var cell = cells[49]
+  if len(cells[0]) != cols {
+    t.Errorf("cols should have length %d, but got %d", cols, len(cells[0]))
+  }
 
-  if cell.Row != 9 || cell.Col != 4 || cell.State != 0 || cell.Content != 0 {
+  var row = cells[rows - 1]
+  var col = row[cols - 1]
+
+  if col.Row != rows - 1 || col.Col != cols -1 || col.State != 0 || col.Content != 0 {
     t.Errorf("last cell does not have correct values for row and col %+v", cells)
   }
+}
 
+func TestCreateBombs(t *testing.T) {
+  var rows = 10
+  var cols = 5
+  var totalBombs = 5
+  board := MineBoard{Rows: rows, Cols: cols, Bombs: totalBombs}
+  board.CreateEmptyBoard()
+  board.CreateBombs()
   countBombs := 0
 
-  for _, cell := range cells {
-    if cell.Content == -1 {
-      countBombs += 1
+  for _, row := range board.Cells {
+    for _, col := range row {
+      if col.Content == -1 {
+        countBombs += 1
+      }
     }
   }
 

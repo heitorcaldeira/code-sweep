@@ -21,29 +21,31 @@ type MineCell struct {
 }
 
 type MineBoard struct {
-  Cells []MineCell
+  Cells [][]MineCell
   Rows int
   Cols int
   Bombs int
 }
 
 func (b *MineBoard) CreateEmptyBoard() {
-  cells := make([]MineCell, 0)
-
+  cells := make([][]MineCell, b.Rows)
   for row := 0; row < b.Rows; row++ {
     for col := 0; col < b.Cols; col++ {
-      cells = append(cells, MineCell{Row: row, Col: col, State: Closed})
+      cells[row] = append(cells[row], MineCell{Row: row, Col: col, State: Closed})
     }
   }
+
+  fmt.Printf("%+v", cells)
 
   b.Cells = cells
 }
 
 func (b *MineBoard) AddBombRandomCell() {
-  item := int32(math.Floor(rand.Float64() * float64(len(b.Cells))))
+  row := int32(math.Floor(rand.Float64() * float64(b.Rows)))
+  col := int32(math.Floor(rand.Float64() * float64(b.Cols)))
 
-  if b.Cells[item].Content == 0 {
-    b.Cells[item].Content = -1
+  if b.Cells[row][col].Content == 0 {
+    b.Cells[row][col].Content = -1
   } else {
     b.AddBombRandomCell()
   }
@@ -58,9 +60,9 @@ func (b *MineBoard) CreateBombs() {
 func (b *MineBoard) Debug() {
   output := ""
   count := 0
-  for row := 0; row < b.Rows; row++ {
-    for col := 0; col < b.Cols; col++ {
-      var content = b.Cells[count].Content
+  for _, row := range b.Cells {
+    for _, col := range row {
+      var content = col.Content
       if content == 0 {
         output += " "
       } else if content > 0 {
@@ -77,10 +79,19 @@ func (b *MineBoard) Debug() {
   fmt.Println(output)
 }
 
+func (b *MineBoard) FillSmartCells() {
+  // for _, row := range b.Cells {
+  //   for _, col := range row {
+  //
+  //   }
+  // }
+}
+
 func NewMineBoard(rows, cols, totalBombs int) MineBoard {
   board := MineBoard{Rows: rows, Cols: cols, Bombs: totalBombs}
   board.CreateEmptyBoard()
   board.CreateBombs()
+  board.FillSmartCells()
 
   return board
 }
