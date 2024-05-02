@@ -2,6 +2,7 @@ package mines
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 )
@@ -19,6 +20,7 @@ const (
 	Iddle    GameStatus = 0
 	Running  GameStatus = 1
 	GameOver GameStatus = 2
+	Victory  GameStatus = 3
 )
 
 type MineCell struct {
@@ -34,6 +36,17 @@ type MineBoard struct {
 	Cols   int
 	Bombs  int
 	Status GameStatus
+}
+
+var cellNeighbors = [][]int{
+  {-1, -1}, // top left
+  {-1, 0}, // top center
+  {-1, 1}, // top right
+  {0, 1}, // right center
+  {1, 1}, // bottom right
+  {1, 0}, // bottom center
+  {1, -1}, //bottom left
+  {0, -1}, // left center
 }
 
 func (b *MineBoard) CreateEmptyBoard() {
@@ -95,69 +108,20 @@ func (b *MineBoard) Debug(showAll bool) {
 func (b *MineBoard) FillSmartCells() {
 	for idxRow, row := range b.Cells {
 		for idxCol, col := range row {
-			currentRow := 0
-			currentCol := 0
-			content := 0
-
 			if col.Content == -1 {
 				continue
 			}
 
-			// corner top left
-			currentRow = idxRow - 1
-			currentCol = idxCol - 1
-			if currentRow >= 0 && currentCol >= 0 && b.Cells[currentRow][currentCol].Content == -1 {
-				content += 1
-			}
-
-			// top center
-			currentRow = idxRow - 1
-			currentCol = idxCol
-			if currentRow >= 0 && b.Cells[currentRow][currentCol].Content == -1 {
-				content += 1
-			}
-
-			// corner top right
-			currentRow = idxRow - 1
-			currentCol = idxCol + 1
-			if currentRow >= 0 && currentCol < b.Cols && b.Cells[currentRow][currentCol].Content == -1 {
-				content += 1
-			}
-
-			// right center
-			currentRow = idxRow
-			currentCol = idxCol + 1
-			if currentCol < b.Cols && b.Cells[currentRow][currentCol].Content == -1 {
-				content += 1
-			}
-
-			// corner bottom right
-			currentRow = idxRow + 1
-			currentCol = idxCol + 1
-			if currentRow < b.Rows && currentCol < b.Cols && b.Cells[currentRow][currentCol].Content == -1 {
-				content += 1
-			}
-
-			// bottom center
-			currentRow = idxRow + 1
-			currentCol = idxCol
-			if currentRow < b.Rows && b.Cells[currentRow][currentCol].Content == -1 {
-				content += 1
-			}
-
-			// corner bottom left
-			currentRow = idxRow + 1
-			currentCol = idxCol - 1
-			if currentRow < b.Rows && currentCol >= 0 && b.Cells[currentRow][currentCol].Content == -1 {
-				content += 1
-			}
-
-			// center right
-			currentRow = idxRow
-			currentCol = idxCol - 1
-			if currentCol >= 0 && b.Cells[currentRow][currentCol].Content == -1 {
-				content += 1
-			}
+      content := 0
+      for _, idx := range cellNeighbors {
+        currentRow := idxRow + idx[0]
+        currentCol := idxCol + idx[1]
+        if currentRow >= 0 && currentRow < b.Rows && currentCol >= 0 && currentCol < b.Cols {
+          if b.Cells[currentRow][currentCol].Content == -1 {
+            content += 1
+          }
+        }
+      }
 
 			b.Cells[idxRow][idxCol].Content = content
 		}
@@ -165,18 +129,7 @@ func (b *MineBoard) FillSmartCells() {
 }
 
 func (b *MineBoard) OpenBlankCells(row, col int) {
-	var idxs = [][]int{
-    {-1, -1}, // top left
-    {-1, 0}, // top center
-    {-1, 1}, // top right
-    {0, 1}, // right center
-    {1, 1}, // bottom right
-    {1, 0}, // bottom center
-    {1, -1}, //bottom left
-    {0, -1}, // left center
-  }
-
-  for _, idx := range idxs {
+  for _, idx := range cellNeighbors {
     currentRow := row + idx[0]
     currentCol := col + idx[1]
     if currentRow >= 0 && currentRow < b.Rows && currentCol >= 0 && currentCol < b.Cols {
@@ -193,9 +146,30 @@ func (b *MineBoard) OpenBlankCells(row, col int) {
 	}
 }
 
+func (p *MineBoard) CheckForWin() {
+  countClosed := 0
+
+	for _, row := range p.Cells {
+		for _, col := range row {
+      if col.State == Closed {
+        countClosed += 1
+      }
+    }
+  }
+
+  if countClosed == p.Bombs {
+    log.Fatal("YOU WON!!!")
+    p.Status = Victory
+
+    for idxRow, row := range p.Cells {
+      for idxCol := range row {
+        p.Cells[idxRow][idxCol].State = Opened
+      }
+    }
+  }
+}
+
 func (p *MineBoard) PickCell(row, col int) error {
-  fmt.Printf("row %d col %d", row, col)
-  fmt.Println()
 	if row >= 0 && row < p.Rows && col >= 0 && col < p.Cols {
 		var content = p.Cells[row][col].Content
 
