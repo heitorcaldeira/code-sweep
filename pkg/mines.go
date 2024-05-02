@@ -2,7 +2,6 @@ package mines
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"math/rand"
 )
@@ -17,7 +16,6 @@ const (
 type GameStatus = int
 
 const (
-	Iddle    GameStatus = 0
 	Running  GameStatus = 1
 	GameOver GameStatus = 2
 	Victory  GameStatus = 3
@@ -158,7 +156,7 @@ func (p *MineBoard) CheckForWin() {
   }
 
   if countClosed == p.Bombs {
-    log.Fatal("YOU WON!!!")
+    fmt.Println("YOU WON!!!")
     p.Status = Victory
 
     for idxRow, row := range p.Cells {
@@ -189,7 +187,7 @@ func (p *MineBoard) PickCell(row, col int) error {
 }
 
 func NewMineBoard(rows, cols, totalBombs int) MineBoard {
-	board := MineBoard{Rows: rows, Cols: cols, Bombs: totalBombs, Status: Iddle}
+	board := MineBoard{Rows: rows, Cols: cols, Bombs: totalBombs, Status: Running}
 	board.CreateEmptyBoard()
 	board.CreateBombs()
 	board.FillSmartCells()

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -11,15 +12,15 @@ import (
 	mines "github.com/heitorcaldeira/code-sweep/pkg"
 )
 
-func main() {
-  board := mines.NewMineBoard(10, 10, 5)
-  board.Debug(true)
+func TerminalPlay() {
+  board := mines.NewMineBoard(10, 5, 0)
+  board.Debug(false)
 
   timer := time.NewTicker(100 * time.Millisecond)
 
   for {
     <- timer.C
-    // err := board.PickCell(int(math.Floor(rand.Float64() * 10)), int(math.Floor(rand.Float64() * 10)))
+    fmt.Println("Insert a row and a col: (XY)")
     reader := bufio.NewReader(os.Stdin)
     line, err := reader.ReadString('\n')
     if err != nil {
@@ -53,4 +54,8 @@ func main() {
 
     board.CheckForWin()
   }
+}
+
+func main() {
+  TerminalPlay()
 }

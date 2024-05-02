@@ -2,10 +2,11 @@ package mines
 
 import "testing"
 
+var rows = 10
+var cols = 5
+var totalBombs = 5
+
 func TestCreateEmptyBoard(t *testing.T) {
-  var rows = 10
-  var cols = 5
-  var totalBombs = 5
   board := MineBoard{Rows: rows, Cols: cols, Bombs: totalBombs}
   board.CreateEmptyBoard()
 
@@ -28,9 +29,6 @@ func TestCreateEmptyBoard(t *testing.T) {
 }
 
 func TestCreateBombs(t *testing.T) {
-  var rows = 10
-  var cols = 5
-  var totalBombs = 5
   board := MineBoard{Rows: rows, Cols: cols, Bombs: totalBombs}
   board.CreateEmptyBoard()
   board.CreateBombs()
@@ -49,3 +47,36 @@ func TestCreateBombs(t *testing.T) {
   }
 }
 
+func TestPickCell(t *testing.T) {
+  board := MineBoard{Rows: rows, Cols: cols, Bombs: 50, Status: Running}
+  board.CreateEmptyBoard()
+  board.CreateBombs()
+  board.FillSmartCells()
+  board.PickCell(4, 4)
+
+  if board.Status != GameOver {
+    t.Errorf("picked a bomb and game is not over")
+  }
+
+  board = MineBoard{Rows: rows, Cols: cols, Bombs: 0, Status: Running}
+  board.CreateEmptyBoard()
+  board.FillSmartCells()
+  board.PickCell(4, 4)
+
+  if board.Cells[4][4].State != Opened {
+    t.Errorf("the cell should be opened, but is closed")
+  }
+}
+
+func TestOpenBlankCells(t *testing.T) {
+  board := MineBoard{Rows: rows, Cols: cols, Bombs: 0, Status: Running}
+  board.CreateEmptyBoard()
+  board.CreateBombs()
+  board.FillSmartCells()
+  board.PickCell(4, 4)
+  board.CheckForWin()
+
+  if board.Status != Victory {
+    t.Errorf("the game should return a victory status, but returned %d", board.Status)
+  }
+}
