@@ -13,13 +13,13 @@ import (
 )
 
 func TerminalPlay() {
-  board := mines.NewMineBoard(10, 5, 0)
-  board.Debug(false)
-
+  board := mines.NewMineBoard(10, 10, 22)
   timer := time.NewTicker(100 * time.Millisecond)
 
   for {
     <- timer.C
+    fmt.Print("\033[H\033[2J")
+    board.Debug(false)
     fmt.Println("Insert a row and a col: (XY)")
     reader := bufio.NewReader(os.Stdin)
     line, err := reader.ReadString('\n')
@@ -53,6 +53,10 @@ func TerminalPlay() {
     }
 
     board.CheckForWin()
+
+    if board.Status == mines.Victory {
+      log.Fatal("YOU WON")
+    }
   }
 }
 

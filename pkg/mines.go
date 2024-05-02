@@ -156,7 +156,6 @@ func (p *MineBoard) CheckForWin() {
   }
 
   if countClosed == p.Bombs {
-    fmt.Println("YOU WON!!!")
     p.Status = Victory
 
     for idxRow, row := range p.Cells {
