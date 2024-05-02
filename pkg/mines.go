@@ -37,14 +37,14 @@ type MineBoard struct {
 }
 
 var cellNeighbors = [][]int{
-  {-1, -1}, // top left
-  {-1, 0}, // top center
-  {-1, 1}, // top right
-  {0, 1}, // right center
-  {1, 1}, // bottom right
-  {1, 0}, // bottom center
-  {1, -1}, //bottom left
-  {0, -1}, // left center
+	{-1, -1}, // top left
+	{-1, 0},  // top center
+	{-1, 1},  // top right
+	{0, 1},   // right center
+	{1, 1},   // bottom right
+	{1, 0},   // bottom center
+	{1, -1},  //bottom left
+	{0, -1},  // left center
 }
 
 func (b *MineBoard) CreateEmptyBoard() {
@@ -78,7 +78,10 @@ func (b *MineBoard) CreateBombs() {
 func (b *MineBoard) Debug(showAll bool) {
 	output := ""
 	count := 0
-	for _, row := range b.Cells {
+
+	for idxRow, row := range b.Cells {
+		output += fmt.Sprintf("%d ", idxRow)
+
 		for _, col := range row {
 			var content = col.Content
 
@@ -88,7 +91,7 @@ func (b *MineBoard) Debug(showAll bool) {
 			}
 
 			if content == 0 {
-				output += "o"
+				output += "."
 			} else if content > 0 {
 				output += fmt.Sprint(content)
 			} else {
@@ -100,6 +103,11 @@ func (b *MineBoard) Debug(showAll bool) {
 		output += "\n"
 	}
 
+	fmt.Print("  ")
+	for i := 0; i < b.Cols; i++ {
+		fmt.Printf("%d", i)
+	}
+	fmt.Println()
 	fmt.Println(output)
 }
 
@@ -110,16 +118,16 @@ func (b *MineBoard) FillSmartCells() {
 				continue
 			}
 
-      content := 0
-      for _, idx := range cellNeighbors {
-        currentRow := idxRow + idx[0]
-        currentCol := idxCol + idx[1]
-        if currentRow >= 0 && currentRow < b.Rows && currentCol >= 0 && currentCol < b.Cols {
-          if b.Cells[currentRow][currentCol].Content == -1 {
-            content += 1
-          }
-        }
-      }
+			content := 0
+			for _, idx := range cellNeighbors {
+				currentRow := idxRow + idx[0]
+				currentCol := idxCol + idx[1]
+				if currentRow >= 0 && currentRow < b.Rows && currentCol >= 0 && currentCol < b.Cols {
+					if b.Cells[currentRow][currentCol].Content == -1 {
+						content += 1
+					}
+				}
+			}
 
 			b.Cells[idxRow][idxCol].Content = content
 		}
@@ -127,43 +135,43 @@ func (b *MineBoard) FillSmartCells() {
 }
 
 func (b *MineBoard) OpenBlankCells(row, col int) {
-  for _, idx := range cellNeighbors {
-    currentRow := row + idx[0]
-    currentCol := col + idx[1]
-    if currentRow >= 0 && currentRow < b.Rows && currentCol >= 0 && currentCol < b.Cols {
-      b.Cells[row][col].State = Opened
+	for _, idx := range cellNeighbors {
+		currentRow := row + idx[0]
+		currentCol := col + idx[1]
+		if currentRow >= 0 && currentRow < b.Rows && currentCol >= 0 && currentCol < b.Cols {
+			b.Cells[row][col].State = Opened
 
-      content := b.Cells[currentRow][currentCol].Content 
+			content := b.Cells[currentRow][currentCol].Content
 
-      if content > 0 {
-        b.Cells[currentRow][currentCol].State = Opened
-      } else if content == 0 && b.Cells[currentRow][currentCol].State == Closed {
-        b.OpenBlankCells(currentRow, currentCol)
-      }
-    }
+			if content > 0 {
+				b.Cells[currentRow][currentCol].State = Opened
+			} else if content == 0 && b.Cells[currentRow][currentCol].State == Closed {
+				b.OpenBlankCells(currentRow, currentCol)
+			}
+		}
 	}
 }
 
 func (p *MineBoard) CheckForWin() {
-  countClosed := 0
+	countClosed := 0
 
 	for _, row := range p.Cells {
 		for _, col := range row {
-      if col.State == Closed {
-        countClosed += 1
-      }
-    }
-  }
+			if col.State == Closed {
+				countClosed += 1
+			}
+		}
+	}
 
-  if countClosed == p.Bombs {
-    p.Status = Victory
+	if countClosed == p.Bombs {
+		p.Status = Victory
 
-    for idxRow, row := range p.Cells {
-      for idxCol := range row {
-        p.Cells[idxRow][idxCol].State = Opened
-      }
-    }
-  }
+		for idxRow, row := range p.Cells {
+			for idxCol := range row {
+				p.Cells[idxRow][idxCol].State = Opened
+			}
+		}
+	}
 }
 
 func (p *MineBoard) PickCell(row, col int) error {

@@ -13,53 +13,53 @@ import (
 )
 
 func TerminalPlay() {
-  board := mines.NewMineBoard(10, 10, 22)
-  timer := time.NewTicker(100 * time.Millisecond)
+	board := mines.NewMineBoard(10, 10, 10)
+	timer := time.NewTicker(100 * time.Millisecond)
 
-  for {
-    <- timer.C
-    fmt.Print("\033[H\033[2J")
-    board.Debug(false)
-    fmt.Println("Insert a row and a col: (XY)")
-    reader := bufio.NewReader(os.Stdin)
-    line, err := reader.ReadString('\n')
-    if err != nil {
-        log.Fatal(err)
-    }
+	for {
+		<-timer.C
+		fmt.Print("\033[H\033[2J")
+		board.Debug(false)
+		fmt.Println("Insert a row and a col: (XY)")
+		reader := bufio.NewReader(os.Stdin)
+		line, err := reader.ReadString('\n')
+		if err != nil {
+			log.Fatal(err)
+		}
 
-    cmd := strings.Split(line, "")
-    row, err := strconv.ParseFloat(cmd[0], 64)
+		cmd := strings.Split(line, "")
+		row, err := strconv.ParseFloat(cmd[0], 64)
 
-    if err != nil {
-        log.Fatal(err)
-    }
+		if err != nil {
+			log.Fatal(err)
+		}
 
-    col, err := strconv.ParseFloat(cmd[1], 64)
+		col, err := strconv.ParseFloat(cmd[1], 64)
 
-    if err != nil {
-        log.Fatal(err)
-    }
+		if err != nil {
+			log.Fatal(err)
+		}
 
-    err = board.PickCell(int(row), int(col))
+		err = board.PickCell(int(row), int(col))
 
-    if err != nil {
-        log.Fatal(err)
-    }
+		if err != nil {
+			log.Fatal(err)
+		}
 
-    board.Debug(false)
+		board.Debug(false)
 
-    if board.Status == mines.GameOver {
-      log.Fatal("GAME OVER")
-    }
+		if board.Status == mines.GameOver {
+			log.Fatal("GAME OVER")
+		}
 
-    board.CheckForWin()
+		board.CheckForWin()
 
-    if board.Status == mines.Victory {
-      log.Fatal("YOU WON")
-    }
-  }
+		if board.Status == mines.Victory {
+			log.Fatal("YOU WON")
+		}
+	}
 }
 
 func main() {
-  TerminalPlay()
+	TerminalPlay()
 }
