@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-  board := mines.NewMineBoard(10, 10, 10)
+  board := mines.NewMineBoard(10, 10, 5)
   board.Debug(true)
 
   timer := time.NewTicker(2000 * time.Millisecond)

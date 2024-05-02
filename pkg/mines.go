@@ -71,12 +71,12 @@ func (b *MineBoard) Debug(showAll bool) {
 		for _, col := range row {
 			var content = col.Content
 
-      if !showAll && col.State == Closed {
-        output += "▒"
-        continue
-      } 
+			if !showAll && col.State == Closed {
+				output += "▒"
+				continue
+			}
 
-      if content == 0 {
+			if content == 0 {
 				output += "o"
 			} else if content > 0 {
 				output += fmt.Sprint(content)
@@ -164,11 +164,38 @@ func (b *MineBoard) FillSmartCells() {
 	}
 }
 
-func (p *MineBoard) OpenBlankCells(row, col int) {
+func (b *MineBoard) OpenBlankCells(row, col int) {
+	var idxs = [][]int{
+    {-1, -1}, // top left
+    {-1, 0}, // top center
+    {-1, 1}, // top right
+    {0, 1}, // right center
+    {1, 1}, // bottom right
+    {1, 0}, // bottom center
+    {1, -1}, //bottom left
+    {0, -1}, // left center
+  }
 
+  for _, idx := range idxs {
+    currentRow := row + idx[0]
+    currentCol := col + idx[1]
+    if currentRow >= 0 && currentRow < b.Rows && currentCol >= 0 && currentCol < b.Cols {
+      b.Cells[row][col].State = Opened
+
+      content := b.Cells[currentRow][currentCol].Content 
+
+      if content > 0 {
+        b.Cells[currentRow][currentCol].State = Opened
+      } else if content == 0 && b.Cells[currentRow][currentCol].State == Closed {
+        b.OpenBlankCells(currentRow, currentCol)
+      }
+    }
+	}
 }
 
-func (p *MineBoard) PickCell(row, col int) (error) {
+func (p *MineBoard) PickCell(row, col int) error {
+  fmt.Printf("row %d col %d", row, col)
+  fmt.Println()
 	if row >= 0 && row < p.Rows && col >= 0 && col < p.Cols {
 		var content = p.Cells[row][col].Content
 
@@ -176,7 +203,7 @@ func (p *MineBoard) PickCell(row, col int) (error) {
 		case -1:
 			p.Status = GameOver
 		case 0:
-      p.OpenBlankCells(row, col)
+			p.OpenBlankCells(row, col)
 		}
 
 		p.Cells[row][col].State = Opened
